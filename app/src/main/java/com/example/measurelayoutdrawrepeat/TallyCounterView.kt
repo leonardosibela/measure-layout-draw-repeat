@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
 
+const val MAX_COUNT_STRING = "0000"
+
 class TallyCounterView(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet),
     TallyCounter {
 
@@ -71,6 +73,52 @@ class TallyCounterView(context: Context, attributeSet: AttributeSet?) : View(con
 
         // Drawing the text on the canvas passing the x and y values and the numberPaint
         canvas.drawText(displayCount, textX, baselineY, numberPaint)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val fontMetrics = numberPaint.fontMetrics
+
+        // Measure the maximum possible width of text
+        val maxTextWidth = numberPaint.measureText(MAX_COUNT_STRING)
+
+        // Estimate maximum possible height of text
+        val maxTextHeight = -fontMetrics.top + fontMetrics.bottom
+
+        // Adding padding to maximum height calculation
+        val desireWidth = (maxTextWidth + paddingLeft + paddingRight).roundToInt()
+
+        // Adding padding to maximum height calculation
+        val desireHeight = (maxTextHeight * 2f + paddingTop + paddingBottom).roundToInt()
+
+        // Reconcile size the this view wants to be with the size the parent will let it be
+        val reconcileMeasureWidth = reconcileSize(desireWidth, widthMeasureSpec)
+        val reconcileMeasureHeight = reconcileSize(desireHeight, heightMeasureSpec)
+
+        // Store the final measure dimensions
+        setMeasuredDimension(reconcileMeasureWidth, reconcileMeasureHeight)
+    }
+
+    private fun reconcileSize(contentSize: Int, measureSpec: Int): Int {
+        val mode = MeasureSpec.getMode(measureSpec)
+        val specSize = MeasureSpec.getSize(measureSpec)
+
+        return when (mode) {
+            MeasureSpec.EXACTLY -> {
+                specSize
+            }
+
+            MeasureSpec.AT_MOST -> {
+                if (contentSize < specSize) {
+                    contentSize
+                } else {
+                    specSize
+                }
+            }
+
+            else -> {
+                contentSize
+            }
+        }
     }
 
     override fun reset() {
