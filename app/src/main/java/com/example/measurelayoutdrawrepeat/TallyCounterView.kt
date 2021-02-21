@@ -122,11 +122,15 @@ class TallyCounterView(context: Context, attributeSet: AttributeSet?) : View(con
     }
 
     override fun reset() {
-        Toast.makeText(context, "Reseting", Toast.LENGTH_LONG).show()
+        displayCount = "0000"
+        invalidate()
     }
 
     override fun increment() {
-        Toast.makeText(context, "Incrementing", Toast.LENGTH_LONG).show()
+        var currentValue = displayCount.toInt()
+        currentValue++
+        displayCount = currentValue.toString().padStart(4, '0')
+        invalidate()
     }
 
     override fun getCount(): Int {
